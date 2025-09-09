@@ -1,0 +1,4 @@
+name: TraceBrush
+version: '0.1'
+main: com.github.nickxgrom.traceBrush.TraceBrush
+api-version: '1.21'
