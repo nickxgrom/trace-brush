@@ -5,6 +5,7 @@ import com.github.nickxgrom.traceBrush.models.TraceBrushItem;
 import org.bukkit.Bukkit;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -17,7 +18,7 @@ public final class TraceBrush extends JavaPlugin implements Listener {
     public void onEnable() {
         saveDefaultConfig();
         Bukkit.getPluginManager().registerEvents(new UseTraceBrush(), this);
-        TraceBrushItem.RegisterBrushItem();
+        TraceBrushItem.RegisterBrushItem(getConfig().getStringList("traceBrushCraft"));
     }
 
     @Override

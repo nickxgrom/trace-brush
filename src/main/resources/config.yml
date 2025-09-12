@@ -1,2 +1,8 @@
 rubTimeInSeconds: 2
 maxTargetDistance: 3
+
+traceBrushCraft: [
+  diamond, diamond, ink_sac,
+  diamond, brush, diamond,
+  diamond, diamond, diamond
+]
