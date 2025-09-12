@@ -1,6 +1,7 @@
 package com.github.nickxgrom.traceBrush;
 
 import com.github.nickxgrom.traceBrush.listeners.UseTraceBrush;
+import com.github.nickxgrom.traceBrush.models.TraceBrushItem;
 import org.bukkit.Bukkit;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -16,6 +17,7 @@ public final class TraceBrush extends JavaPlugin implements Listener {
     public void onEnable() {
         saveDefaultConfig();
         Bukkit.getPluginManager().registerEvents(new UseTraceBrush(), this);
+        TraceBrushItem.RegisterBrushItem();
     }
 
     @Override
