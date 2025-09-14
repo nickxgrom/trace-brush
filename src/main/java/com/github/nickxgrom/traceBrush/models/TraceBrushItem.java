@@ -83,6 +83,9 @@ public class TraceBrushItem extends ItemStack {
 
         if (block == null) {
             meta.getPersistentDataContainer().set(new NamespacedKey(plugin, "has_fingerprint"), PersistentDataType.BOOLEAN, false);
+            meta.lore(List.of(
+                    Component.text("No fingerprint found").color(NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false)
+            ));
         } else {
             meta.getPersistentDataContainer().set(new NamespacedKey(plugin, "has_fingerprint"), PersistentDataType.BOOLEAN, true);
             meta.getPersistentDataContainer().set(new NamespacedKey(plugin, "placed_by"), PersistentDataType.STRING, player.getUniqueId().toString());
@@ -95,6 +98,10 @@ public class TraceBrushItem extends ItemStack {
                     }
             );
             meta.getPersistentDataContainer().set(new NamespacedKey(plugin, "block_material"), PersistentDataType.STRING, block.getType().name());
+            meta.lore(List.of(
+                    Component.text(String.format("Material: %s", block.getType().name().toLowerCase())).color(NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false),
+                    Component.text(String.format("%d %d %d", block.getLocation().getBlockX(), block.getLocation().getBlockY(), block.getLocation().getBlockZ())).color(NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false)
+            ));
         }
 
         brushItem.setItemMeta(meta);
