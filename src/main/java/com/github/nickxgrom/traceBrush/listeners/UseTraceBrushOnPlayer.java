@@ -1,5 +1,7 @@
 package com.github.nickxgrom.traceBrush.listeners;
 
+import com.github.nickxgrom.traceBrush.TraceBrush;
+import com.github.nickxgrom.traceBrush.utils.TraceBrushUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -7,15 +9,14 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
+
 import java.util.Objects;
 import java.util.UUID;
 
 import static com.github.nickxgrom.traceBrush.utils.TraceBrushUtils.isBrushInHand;
 import static com.github.nickxgrom.traceBrush.utils.TraceBrushUtils.secondsToTicks;
 
-import com.github.nickxgrom.traceBrush.TraceBrush;
-
-public class UseTraceBrush implements Listener {
+public class UseTraceBrushOnPlayer implements Listener {
     private final TraceBrush plugin = JavaPlugin.getPlugin(TraceBrush.class);
     private final int RUB_TIME_IN_SECONDS = plugin.getConfig().getInt("rubTimeInSeconds");
     private final int MAX_TARGET_DISTANCE = plugin.getConfig().getInt("maxTargetDistance");
@@ -25,22 +26,22 @@ public class UseTraceBrush implements Listener {
     public void onBrushUse(PlayerInteractEntityEvent event) {
         Player player = event.getPlayer();
 
-        if (!isBrushInHand(player)) return;
+        if (!isBrushInHand(player) || !TraceBrushUtils.isBrushHasFingerprint(player)) return;
         if (!(event.getRightClicked() instanceof Player target)) return;
 
         UUID playerId = player.getUniqueId();
         UUID targetId = target.getUniqueId();
         long now = System.currentTimeMillis();
 
-        if (plugin.activeTraces.containsKey(playerId)) {
-            if (plugin.activeTraces.get(playerId).equals(targetId)) {
+        if (plugin.activePlayerTraces.containsKey(playerId)) {
+            if (plugin.activePlayerTraces.get(playerId).equals(targetId)) {
                 plugin.playersHoldingRightClickTimestamp.put(playerId, now);
             }
 
             return;
         }
 
-        plugin.activeTraces.put(playerId, targetId);
+        plugin.activePlayerTraces.put(playerId, targetId);
         plugin.playersHoldingRightClickTimestamp.put(playerId, now);
 
         new BukkitRunnable() {
@@ -51,7 +52,7 @@ public class UseTraceBrush implements Listener {
             public void run() {
                 ticks++;
 
-                boolean isPlayerInProgress = plugin.activeTraces.containsKey(playerId);
+                boolean isPlayerInProgress = plugin.activePlayerTraces.containsKey(playerId);
                 boolean isKeyPressed = plugin.playersHoldingRightClickTimestamp.get(playerId) != null && System.currentTimeMillis() - plugin.playersHoldingRightClickTimestamp.get(playerId) <= HOLD_TIMEOUT_MS;
                 boolean isLookingAtTarget = player.getTargetEntity(MAX_TARGET_DISTANCE) != null && Objects.requireNonNull(player.getTargetEntity(3)).getUniqueId().equals(targetId);
 
@@ -68,7 +69,7 @@ public class UseTraceBrush implements Listener {
             }
 
             private void cleanup() {
-                plugin.activeTraces.remove(playerId);
+                plugin.activePlayerTraces.remove(playerId);
                 plugin.playersHoldingRightClickTimestamp.remove(playerId);
                 cancel();
             }

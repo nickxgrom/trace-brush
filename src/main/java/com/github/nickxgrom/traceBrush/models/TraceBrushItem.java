@@ -6,17 +6,21 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.block.Block;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Objects;
 
+import static com.github.nickxgrom.traceBrush.utils.TraceBrushUtils.isBrushInHand;
 
-public class TraceBrushItem {
+public class TraceBrushItem extends ItemStack {
     private static final ItemStack traceBrushItem = ItemStack.of(Material.RECOVERY_COMPASS);
     private static final TraceBrush plugin = JavaPlugin.getPlugin(TraceBrush.class);
     private static final NamespacedKey key = new NamespacedKey(plugin, "traceBrush");
@@ -66,5 +70,41 @@ public class TraceBrushItem {
         }
 
         plugin.getServer().addRecipe(recipe);
+    }
+
+    public static void writeFingerprintToBrush(Player player, @Nullable Block block) {
+        ItemStack brushItem = getFingerprintBrushFromHand(player);
+
+        if (brushItem == null) return;
+
+        ItemMeta meta = brushItem.getItemMeta();
+        if (meta == null) return;
+
+
+        if (block == null) {
+            meta.getPersistentDataContainer().set(new NamespacedKey(plugin, "has_fingerprint"), PersistentDataType.BOOLEAN, false);
+        } else {
+            meta.getPersistentDataContainer().set(new NamespacedKey(plugin, "has_fingerprint"), PersistentDataType.BOOLEAN, true);
+            meta.getPersistentDataContainer().set(new NamespacedKey(plugin, "placed_by"), PersistentDataType.STRING, player.getUniqueId().toString());
+            meta.getPersistentDataContainer().set(
+                    new NamespacedKey(plugin, "block_location"),
+                    PersistentDataType.LONG_ARRAY, new long[]{
+                            block.getLocation().getBlockX(),
+                            block.getLocation().getBlockY(),
+                            block.getLocation().getBlockZ(),
+                    }
+            );
+            meta.getPersistentDataContainer().set(new NamespacedKey(plugin, "block_material"), PersistentDataType.STRING, block.getType().name());
+        }
+
+        brushItem.setItemMeta(meta);
+    }
+
+    private static ItemStack getFingerprintBrushFromHand(Player player) {
+        if (isBrushInHand(player)) {
+            return player.getInventory().getItemInMainHand();
+        } else {
+            return null;
+        }
     }
 }

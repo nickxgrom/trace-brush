@@ -26,4 +26,11 @@ public class TraceBrushUtils {
     public static int secondsToTicks(int seconds) {
         return seconds * 20;
     }
+
+    public static boolean isBrushHasFingerprint(Player player) {
+        if (!isBrushInHand(player)) return false;
+
+        NamespacedKey fingerprintKey = new NamespacedKey(JavaPlugin.getPlugin(TraceBrush.class), "has_fingerprint");
+        return Boolean.TRUE.equals(player.getInventory().getItemInMainHand().getItemMeta().getPersistentDataContainer().get(fingerprintKey, PersistentDataType.BOOLEAN));
+    }
 }
