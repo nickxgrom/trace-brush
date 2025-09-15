@@ -5,6 +5,7 @@ import com.github.nickxgrom.traceBrush.TraceBrush;
 import com.github.nickxgrom.traceBrush.models.TraceBrushItem;
 import com.github.nickxgrom.traceBrush.utils.TraceBrushUtils;
 import net.coreprotect.CoreProtectAPI;
+import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -79,12 +80,10 @@ public class UseTraceBrushOnBlock implements Listener {
                     if (!lookup.isEmpty()) {
                         String[] lastEntry = lookup.getLast();
                         String placer = coreProtectAPI.parseResult(lastEntry).getPlayer();
-                        player.sendMessage("placer: " + placer);
 
-                        TraceBrushItem.writeFingerprintToBrush(player, targetBlock);
+                        TraceBrushItem.writeFingerprintToBrush(player, Bukkit.getOfflinePlayer(placer).getUniqueId(), targetBlock);
                     } else {
-                        player.sendMessage("No fingerprint found");
-                        TraceBrushItem.writeFingerprintToBrush(player, null);
+                        TraceBrushItem.writeFingerprintToBrush(player, null, null);
                     }
 
                     cleanup();

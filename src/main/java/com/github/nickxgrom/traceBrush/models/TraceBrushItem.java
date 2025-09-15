@@ -75,7 +75,7 @@ public class TraceBrushItem extends ItemStack {
         plugin.getServer().addRecipe(recipe);
     }
 
-    public static void writeFingerprintToBrush(Player player, @Nullable Block block) {
+    public static void writeFingerprintToBrush(Player player, @Nullable UUID placedBy, @Nullable Block block) {
         ItemStack brushItem = getFingerprintBrushFromHand(player);
 
         if (brushItem == null) return;
@@ -91,7 +91,7 @@ public class TraceBrushItem extends ItemStack {
             ));
         } else {
             meta.getPersistentDataContainer().set(new NamespacedKey(plugin, "has_fingerprint"), PersistentDataType.BOOLEAN, true);
-            meta.getPersistentDataContainer().set(new NamespacedKey(plugin, "placed_by"), PersistentDataType.STRING, player.getUniqueId().toString());
+            meta.getPersistentDataContainer().set(new NamespacedKey(plugin, "placed_by"), PersistentDataType.STRING, placedBy != null ? placedBy.toString() : "");
             meta.getPersistentDataContainer().set(
                     new NamespacedKey(plugin, "block_location"),
                     PersistentDataType.LONG_ARRAY, new long[]{
@@ -110,7 +110,7 @@ public class TraceBrushItem extends ItemStack {
         brushItem.setItemMeta(meta);
     }
 
-    private static ItemStack getFingerprintBrushFromHand(Player player) {
+    public static ItemStack getFingerprintBrushFromHand(Player player) {
         if (isBrushInHand(player)) {
             return player.getInventory().getItemInMainHand();
         } else {

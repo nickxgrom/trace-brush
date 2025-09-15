@@ -1,12 +1,17 @@
 package com.github.nickxgrom.traceBrush.listeners;
 
 import com.github.nickxgrom.traceBrush.TraceBrush;
+import com.github.nickxgrom.traceBrush.models.TraceBrushItem;
 import com.github.nickxgrom.traceBrush.utils.TraceBrushUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -61,9 +66,23 @@ public class UseTraceBrushOnPlayer implements Listener {
                     return;
                 }
 
-
                 if (ticks >= maxTicks) {
-                    player.sendMessage("Trace finished. Player name: " + Bukkit.getOfflinePlayer(targetId).getName());
+                    ItemStack brush = TraceBrushItem.getFingerprintBrushFromHand(player);
+                    if (brush == null) return;
+
+                    ItemMeta meta = brush.getItemMeta();
+                    if (meta == null) return;
+
+                    String uuidString = meta.getPersistentDataContainer().get(new NamespacedKey(plugin, "placed_by"), PersistentDataType.STRING);
+                    if (uuidString == null) return;
+
+                    UUID fingerprintPlacedByUUID = UUID.fromString(uuidString);
+                    if (fingerprintPlacedByUUID.equals(targetId)) {
+                        target.setGlowing(true);
+                    }
+
+                    Bukkit.getScheduler().runTaskLater(plugin, () -> target.setGlowing(false), 20L * 5);
+
                     cleanup();
                 }
             }
