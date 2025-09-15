@@ -1,5 +1,6 @@
 package com.github.nickxgrom.traceBrush;
 
+import com.github.nickxgrom.traceBrush.listeners.OnFingerprintBrushCraft;
 import com.github.nickxgrom.traceBrush.listeners.UseTraceBrushOnBlock;
 import com.github.nickxgrom.traceBrush.listeners.UseTraceBrushOnPlayer;
 import com.github.nickxgrom.traceBrush.models.TraceBrushItem;
@@ -22,6 +23,7 @@ public final class TraceBrush extends JavaPlugin implements Listener {
         saveDefaultConfig();
         Bukkit.getPluginManager().registerEvents(new UseTraceBrushOnPlayer(), this);
         Bukkit.getPluginManager().registerEvents(new UseTraceBrushOnBlock(), this);
+        Bukkit.getPluginManager().registerEvents(new OnFingerprintBrushCraft(), this);
         TraceBrushItem.RegisterBrushItem(getConfig().getStringList("traceBrushCraft"));
     }
 

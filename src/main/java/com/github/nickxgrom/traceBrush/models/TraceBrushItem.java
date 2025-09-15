@@ -17,6 +17,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 import static com.github.nickxgrom.traceBrush.utils.TraceBrushUtils.isBrushInHand;
 
@@ -34,6 +35,8 @@ public class TraceBrushItem extends ItemStack {
         meta.setItemModel(NamespacedKey.minecraft("brush"));
         meta.setEnchantmentGlintOverride(true);
         meta.getPersistentDataContainer().set(new NamespacedKey(plugin, "is_trace_brush"), PersistentDataType.BOOLEAN, true);
+        meta.getPersistentDataContainer().set(new NamespacedKey(plugin, "unique_id"), PersistentDataType.STRING, UUID.randomUUID().toString());
+        meta.setMaxStackSize(1);
         traceBrushItem.setItemMeta(meta);
 
         registerRecipe(recipeLines);
