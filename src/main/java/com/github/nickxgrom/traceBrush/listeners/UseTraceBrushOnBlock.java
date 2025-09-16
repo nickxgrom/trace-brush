@@ -91,7 +91,7 @@ public class UseTraceBrushOnBlock implements Listener {
                         if (placedBy == null) {
                             TraceBrushItem.writeFingerprintToBrush(player, null, null);
                             return;
-                        };
+                        }
 
                         TraceBrushItem.writeFingerprintToBrush(player, Bukkit.getOfflinePlayer(placedBy).getUniqueId(), targetBlock);
                     } else {

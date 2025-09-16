@@ -92,6 +92,7 @@ public class TraceBrushItem extends ItemStack {
         } else {
             meta.getPersistentDataContainer().set(new NamespacedKey(plugin, "has_fingerprint"), PersistentDataType.BOOLEAN, true);
             meta.getPersistentDataContainer().set(new NamespacedKey(plugin, "placed_by"), PersistentDataType.STRING, placedBy != null ? placedBy.toString() : "");
+            meta.getPersistentDataContainer().set(new NamespacedKey(JavaPlugin.getPlugin(TraceBrush.class), "timestamp"), PersistentDataType.LONG, System.currentTimeMillis());
             meta.getPersistentDataContainer().set(
                     new NamespacedKey(plugin, "block_location"),
                     PersistentDataType.LONG_ARRAY, new long[]{
@@ -100,10 +101,13 @@ public class TraceBrushItem extends ItemStack {
                             block.getLocation().getBlockZ(),
                     }
             );
-            meta.getPersistentDataContainer().set(new NamespacedKey(plugin, "block_material"), PersistentDataType.STRING, block.getType().name());
+            meta.getPersistentDataContainer().set(new NamespacedKey(plugin, "block_material"), PersistentDataType.STRING, block.getType().data.getCanonicalName());
             meta.lore(List.of(
-                    Component.text(String.format("Material: %s", block.getType().name().toLowerCase())).color(NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false),
-                    Component.text(String.format("%d %d %d", block.getLocation().getBlockX(), block.getLocation().getBlockY(), block.getLocation().getBlockZ())).color(NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false)
+                Component.text("Material: ")
+                    .append(Component.translatable(Objects.requireNonNull(block.getType().getBlockTranslationKey())))
+                    .color(NamedTextColor.WHITE)
+                    .decoration(TextDecoration.ITALIC, false),
+                Component.text(String.format("%d %d %d", block.getLocation().getBlockX(), block.getLocation().getBlockY(), block.getLocation().getBlockZ())).color(NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false)
             ));
         }
 
