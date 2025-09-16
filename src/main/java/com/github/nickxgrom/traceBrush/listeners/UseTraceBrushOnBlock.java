@@ -3,6 +3,7 @@ package com.github.nickxgrom.traceBrush.listeners;
 import com.github.nickxgrom.traceBrush.CoreProtectHook;
 import com.github.nickxgrom.traceBrush.TraceBrush;
 import com.github.nickxgrom.traceBrush.models.TraceBrushItem;
+import com.github.nickxgrom.traceBrush.models.types.CoreProtectInteractionType;
 import com.github.nickxgrom.traceBrush.utils.TraceBrushUtils;
 import net.coreprotect.CoreProtectAPI;
 import org.bukkit.Bukkit;
@@ -13,7 +14,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
-
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -78,10 +78,22 @@ public class UseTraceBrushOnBlock implements Listener {
                     List<String[]> lookup = coreProtectAPI.blockLookup(targetBlock, 0);
 
                     if (!lookup.isEmpty()) {
-                        String[] lastEntry = lookup.getLast();
-                        String placer = coreProtectAPI.parseResult(lastEntry).getPlayer();
+                        String placedBy = null;
+                        for (String[] row : lookup) {
+                            CoreProtectAPI.ParseResult result = coreProtectAPI.parseResult(row);
 
-                        TraceBrushItem.writeFingerprintToBrush(player, Bukkit.getOfflinePlayer(placer).getUniqueId(), targetBlock);
+                            if (result.getActionId() == CoreProtectInteractionType.PLACEMENT.ordinal()) {
+                                placedBy = result.getPlayer();
+                                break;
+                            }
+                        }
+
+                        if (placedBy == null) {
+                            TraceBrushItem.writeFingerprintToBrush(player, null, null);
+                            return;
+                        };
+
+                        TraceBrushItem.writeFingerprintToBrush(player, Bukkit.getOfflinePlayer(placedBy).getUniqueId(), targetBlock);
                     } else {
                         TraceBrushItem.writeFingerprintToBrush(player, null, null);
                     }
