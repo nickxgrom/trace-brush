@@ -22,7 +22,7 @@ import java.util.UUID;
 import static com.github.nickxgrom.traceBrush.utils.TraceBrushUtils.isBrushInHand;
 
 public class TraceBrushItem extends ItemStack {
-    private static final ItemStack traceBrushItem = ItemStack.of(Material.RECOVERY_COMPASS);
+    private static final ItemStack traceBrushItem = ItemStack.of(Material.BRUSH);
     private static final TraceBrush plugin = JavaPlugin.getPlugin(TraceBrush.class);
     private static final NamespacedKey key = new NamespacedKey(plugin, "traceBrush");
 
