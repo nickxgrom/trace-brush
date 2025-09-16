@@ -103,11 +103,11 @@ public class TraceBrushItem extends ItemStack {
             );
             meta.getPersistentDataContainer().set(new NamespacedKey(plugin, "block_material"), PersistentDataType.STRING, block.getType().data.getCanonicalName());
             meta.lore(List.of(
-                Component.text("Material: ")
-                    .append(Component.translatable(Objects.requireNonNull(block.getType().getBlockTranslationKey())))
-                    .color(NamedTextColor.WHITE)
-                    .decoration(TextDecoration.ITALIC, false),
-                Component.text(String.format("%d %d %d", block.getLocation().getBlockX(), block.getLocation().getBlockY(), block.getLocation().getBlockZ())).color(NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false)
+                    Component.text("Material: ")
+                            .append(Component.translatable(Objects.requireNonNull(block.getType().getBlockTranslationKey())))
+                            .color(NamedTextColor.WHITE)
+                            .decoration(TextDecoration.ITALIC, false),
+                    Component.text(String.format("%d %d %d", block.getLocation().getBlockX(), block.getLocation().getBlockY(), block.getLocation().getBlockZ())).color(NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false)
             ));
         }
 

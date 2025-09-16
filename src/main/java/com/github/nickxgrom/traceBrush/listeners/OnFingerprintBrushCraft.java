@@ -21,7 +21,11 @@ public class OnFingerprintBrushCraft implements Listener {
         ItemMeta meta = item.getItemMeta();
         if (meta == null) return;
 
-        meta.getPersistentDataContainer().set(new NamespacedKey(JavaPlugin.getPlugin(TraceBrush.class), "unique_id"), PersistentDataType.STRING, UUID.randomUUID().toString());
+        NamespacedKey isTraceBrushKey = new NamespacedKey(JavaPlugin.getPlugin(TraceBrush.class), "is_trace_brush");
+        if (!meta.getPersistentDataContainer().has(isTraceBrushKey, PersistentDataType.BOOLEAN)) return;
+
+        NamespacedKey uniqueIdKey = new NamespacedKey(JavaPlugin.getPlugin(TraceBrush.class), "unique_id");
+        meta.getPersistentDataContainer().set(uniqueIdKey, PersistentDataType.STRING, UUID.randomUUID().toString());
 
         item.setItemMeta(meta);
     }

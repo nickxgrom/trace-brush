@@ -19,7 +19,7 @@ public class TraceBrushUtils {
 
         if (meta == null) return false;
 
-        return itemInHand.getType() == TraceBrushItem.getTraceBrush().getType()
+        return itemInHand.getType().equals(TraceBrushItem.getTraceBrush().getType())
                 && Boolean.TRUE.equals(meta.getPersistentDataContainer().get(key, PersistentDataType.BOOLEAN));
     }
 
