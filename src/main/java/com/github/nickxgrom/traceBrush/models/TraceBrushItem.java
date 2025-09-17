@@ -4,8 +4,10 @@ import com.github.nickxgrom.traceBrush.TraceBrush;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -27,12 +29,10 @@ public class TraceBrushItem extends ItemStack {
     private static final NamespacedKey key = new NamespacedKey(plugin, "traceBrush");
 
     public static void RegisterBrushItem(List<String> recipeLines) {
-
         ItemMeta meta = traceBrushItem.getItemMeta();
 
 //        NOTE: think about rework when https://docs.papermc.io/paper/dev/data-component-api/ is not experimental
         meta.displayName(Component.text("Trace Brush").color(NamedTextColor.AQUA).decoration(TextDecoration.ITALIC, false));
-        meta.setItemModel(NamespacedKey.minecraft("brush"));
         meta.setEnchantmentGlintOverride(true);
         meta.getPersistentDataContainer().set(new NamespacedKey(plugin, "is_trace_brush"), PersistentDataType.BOOLEAN, true);
         meta.getPersistentDataContainer().set(new NamespacedKey(plugin, "unique_id"), PersistentDataType.STRING, UUID.randomUUID().toString());
@@ -89,6 +89,7 @@ public class TraceBrushItem extends ItemStack {
             meta.lore(List.of(
                     Component.text("No fingerprint found").color(NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false)
             ));
+            brushItem.setItemMeta(meta);
         } else {
             meta.getPersistentDataContainer().set(new NamespacedKey(plugin, "has_fingerprint"), PersistentDataType.BOOLEAN, true);
             meta.getPersistentDataContainer().set(new NamespacedKey(plugin, "placed_by"), PersistentDataType.STRING, placedBy != null ? placedBy.toString() : "");
@@ -109,9 +110,16 @@ public class TraceBrushItem extends ItemStack {
                             .decoration(TextDecoration.ITALIC, false),
                     Component.text(String.format("%d %d %d", block.getLocation().getBlockX(), block.getLocation().getBlockY(), block.getLocation().getBlockZ())).color(NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false)
             ));
-        }
 
-        brushItem.setItemMeta(meta);
+            ItemStack writtenTraceBrush = new ItemStack(WrittenTraceBrushItem.writtenTraceBrush.getType());
+            meta.setItemModel(Material.BRUSH.getKey());
+            writtenTraceBrush.setItemMeta(meta);
+            player.getInventory().setItemInMainHand(writtenTraceBrush);
+
+            Location soundLocation = block.getLocation().add(0.5, 0.5, 0.5);
+            Sound sound = Sound.ITEM_GLOW_INK_SAC_USE;
+            soundLocation.getWorld().playSound(soundLocation, sound, 1.0f, 1.0f);
+        }
     }
 
     public static ItemStack getFingerprintBrushFromHand(Player player) {

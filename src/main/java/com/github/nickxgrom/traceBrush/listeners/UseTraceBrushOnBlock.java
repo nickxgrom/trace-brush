@@ -4,7 +4,6 @@ import com.github.nickxgrom.traceBrush.CoreProtectHook;
 import com.github.nickxgrom.traceBrush.TraceBrush;
 import com.github.nickxgrom.traceBrush.models.TraceBrushItem;
 import com.github.nickxgrom.traceBrush.models.types.CoreProtectInteractionType;
-import com.github.nickxgrom.traceBrush.utils.TraceBrushUtils;
 import net.coreprotect.CoreProtectAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
@@ -14,6 +13,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
+
 import java.util.List;
 import java.util.UUID;
 
@@ -30,7 +30,7 @@ public class UseTraceBrushOnBlock implements Listener {
     @EventHandler
     public void onBrushUse(PlayerInteractEvent event) {
         Player player = event.getPlayer();
-        if (!isBrushInHand(player) || TraceBrushUtils.isBrushHasFingerprint(player)) return;
+        if (!isBrushInHand(player)) return;
         if (event.getClickedBlock() == null) return;
 
         UUID playerId = player.getUniqueId();
@@ -90,6 +90,7 @@ public class UseTraceBrushOnBlock implements Listener {
                         TraceBrushItem.writeFingerprintToBrush(player, null, null);
                     }
 
+                    player.setCooldown(TraceBrushItem.getTraceBrush().getType(), 20 * 5);
                     cleanup();
                 }
             }
