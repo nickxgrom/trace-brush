@@ -2,6 +2,7 @@ package com.github.nickxgrom.traceBrush.utils;
 
 import com.github.nickxgrom.traceBrush.TraceBrush;
 import com.github.nickxgrom.traceBrush.models.TraceBrushItem;
+import com.github.nickxgrom.traceBrush.models.WrittenTraceBrushItem;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -19,8 +20,10 @@ public class TraceBrushUtils {
 
         if (meta == null) return false;
 
-        return itemInHand.getType().equals(TraceBrushItem.getTraceBrush().getType())
-                && Boolean.TRUE.equals(meta.getPersistentDataContainer().get(key, PersistentDataType.BOOLEAN));
+        return (
+                itemInHand.getType().equals(TraceBrushItem.getTraceBrush().getType())
+                || itemInHand.getType().equals(WrittenTraceBrushItem.writtenTraceBrush.getType())
+        ) && Boolean.TRUE.equals(meta.getPersistentDataContainer().get(key, PersistentDataType.BOOLEAN));
     }
 
     public static int secondsToTicks(int seconds) {
