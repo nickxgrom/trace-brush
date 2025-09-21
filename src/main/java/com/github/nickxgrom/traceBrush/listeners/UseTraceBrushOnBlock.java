@@ -30,7 +30,7 @@ public class UseTraceBrushOnBlock implements Listener {
     @EventHandler
     public void onBrushUse(PlayerInteractEvent event) {
         Player player = event.getPlayer();
-        if (!isBrushInHand(player)) return;
+        if (!isBrushInHand(player, false)) return;
         if (event.getClickedBlock() == null) return;
 
         UUID playerId = player.getUniqueId();
@@ -47,7 +47,7 @@ public class UseTraceBrushOnBlock implements Listener {
 
             @Override
             public void run() {
-                if (!player.isHandRaised() || !isBrushInHand(player)) {
+                if (!player.isHandRaised() || !isBrushInHand(player, false)) {
                     cleanup();
                     return;
                 }
@@ -88,9 +88,10 @@ public class UseTraceBrushOnBlock implements Listener {
                         TraceBrushItem.writeFingerprintToBrush(player, Bukkit.getOfflinePlayer(placedBy).getUniqueId(), currentTarget);
                     } else {
                         TraceBrushItem.writeFingerprintToBrush(player, null, null);
+//                        TODO: maybe sound hints that no data found (or i guess not)
                     }
 
-                    player.setCooldown(TraceBrushItem.getTraceBrush().getType(), 20 * 5);
+                    player.setCooldown(TraceBrushItem.getBlankBrushItem().getType(), 20 * 5);
                     cleanup();
                 }
             }

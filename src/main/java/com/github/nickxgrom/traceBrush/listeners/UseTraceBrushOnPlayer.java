@@ -1,8 +1,6 @@
 package com.github.nickxgrom.traceBrush.listeners;
 
 import com.github.nickxgrom.traceBrush.TraceBrush;
-import com.github.nickxgrom.traceBrush.models.TraceBrushItem;
-import com.github.nickxgrom.traceBrush.utils.TraceBrushUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
@@ -31,7 +29,7 @@ public class UseTraceBrushOnPlayer implements Listener {
     public void onBrushUse(PlayerInteractEntityEvent event) {
         Player player = event.getPlayer();
 
-        if (!isBrushInHand(player) || !TraceBrushUtils.isBrushHasFingerprint(player)) return;
+        if (isBrushInHand(player, false)) return;
         if (!(event.getRightClicked() instanceof Player target)) return;
 
         UUID playerId = player.getUniqueId();
@@ -55,19 +53,20 @@ public class UseTraceBrushOnPlayer implements Listener {
 
             @Override
             public void run() {
+//                TODO: animation and sound; sound if target is not who placed the block
                 ticks++;
 
                 boolean isPlayerInProgress = plugin.activePlayerTraces.containsKey(playerId);
                 boolean isKeyPressed = plugin.playersHoldingRightClickTimestamp.get(playerId) != null && System.currentTimeMillis() - plugin.playersHoldingRightClickTimestamp.get(playerId) <= HOLD_TIMEOUT_MS;
                 boolean isLookingAtTarget = player.getTargetEntity(MAX_TARGET_DISTANCE) != null && Objects.requireNonNull(player.getTargetEntity(3)).getUniqueId().equals(targetId);
 
-                if (!isPlayerInProgress || !isKeyPressed || !isLookingAtTarget || !isBrushInHand(player)) {
+                if (!isPlayerInProgress || !isKeyPressed || !isLookingAtTarget || !isBrushInHand(player, true)) {
                     cleanup();
                     return;
                 }
 
                 if (ticks >= maxTicks) {
-                    ItemStack brush = TraceBrushItem.getFingerprintBrushFromHand(player);
+                    ItemStack brush = isBrushInHand(player, true) ? player.getInventory().getItemInMainHand() : null;
                     if (brush == null) return;
 
                     ItemMeta meta = brush.getItemMeta();
