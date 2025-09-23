@@ -1,5 +1,9 @@
-rubTimeInSeconds: 2
-maxTargetDistance: 3
+brushCooldownInSeconds: 5
+maxTargetDistanceForBlock: 5
+maxTargetDistanceForTarget: 3
+rubTimeInSecondsForBlock: 3
+rubTimeInSecondsForTarget: 3
+glowingEffectDurationInSeconds: 5
 
 traceBrushCraft: [
   diamond, diamond, ink_sac,

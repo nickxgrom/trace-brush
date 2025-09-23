@@ -22,8 +22,8 @@ import static com.github.nickxgrom.traceBrush.utils.TraceBrushUtils.secondsToTic
 
 public class UseTraceBrushOnBlock implements Listener {
     private final TraceBrush plugin = JavaPlugin.getPlugin(TraceBrush.class);
-    private final int RUB_TIME_IN_SECONDS = plugin.getConfig().getInt("rubTimeInSeconds");
-    private final int MAX_TARGET_DISTANCE = plugin.getConfig().getInt("maxTargetDistance");
+    private final int RUB_TIME_IN_SECONDS = plugin.getConfig().getInt("rubTimeInSecondsForBlock", 3);
+    private final int MAX_TARGET_DISTANCE = plugin.getConfig().getInt("maxTargetDistanceForBlock", 3);
     private final CoreProtectAPI coreProtectAPI = new CoreProtectHook().getCoreProtectAPI();
 
 
