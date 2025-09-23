@@ -3,7 +3,6 @@ package com.github.nickxgrom.traceBrush.listeners;
 import com.github.nickxgrom.traceBrush.TraceBrush;
 import com.github.nickxgrom.traceBrush.models.TraceBrushItem;
 import com.github.nickxgrom.traceBrush.utils.TraceBrushUtils;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Sound;
@@ -93,10 +92,8 @@ public class UseTraceBrushOnPlayer implements Listener {
 
                     UUID fingerprintPlacedByUUID = UUID.fromString(uuidString);
                     if (fingerprintPlacedByUUID.equals(targetId)) {
-                        target.setGlowing(true);
+                        TraceBrushUtils.setPlayerGlowing(target, GLOWING_EFFECT_IN_SECONDS);
                     }
-
-                    Bukkit.getScheduler().runTaskLater(plugin, () -> target.setGlowing(false), TraceBrushUtils.secondsToTicks(GLOWING_EFFECT_IN_SECONDS));
 
                     cleanup();
                 }
