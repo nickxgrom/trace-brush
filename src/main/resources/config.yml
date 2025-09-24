@@ -4,8 +4,11 @@ maxTargetDistanceForTarget: 3
 rubTimeInSecondsForBlock: 3
 rubTimeInSecondsForTarget: 3
 glowingEffectDurationInSeconds: 5
+glowingEffectDurationForEvidenceInSeconds: 10
 # for valid colors see https://javadoc.io/static/net.kyori/adventure-api/4.10.1/net/kyori/adventure/text/format/NamedTextColor.html
-glowingEffectColor: aqua
+playerGlowingEffectColor: aqua
+evidenceGlowingEffectColor: yellow
+
 
 traceBrushRecipe: [
   diamond, diamond, ink_sac,
