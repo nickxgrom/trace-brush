@@ -9,6 +9,7 @@ import net.coreprotect.CoreProtectAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
+import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -31,6 +32,7 @@ public class UseTraceBrushOnBlock implements Listener {
     private final int RUB_TIME_IN_SECONDS = plugin.getConfig().getInt("rubTimeInSecondsForBlock", 3);
     private final int MAX_TARGET_DISTANCE = plugin.getConfig().getInt("maxTargetDistanceForBlock", 3);
     private final int GLOWING_EFFECT_IN_SECONDS = plugin.getConfig().getInt("glowingEffectDurationForEvidenceInSeconds", 5);
+    private final int BRUSH_COOLDOWN_IN_SECONDS = plugin.getConfig().getInt("brushCooldownInSeconds", 5);
     private final CoreProtectAPI coreProtectAPI = new CoreProtectHook().getCoreProtectAPI();
 
     @EventHandler
@@ -60,43 +62,36 @@ public class UseTraceBrushOnBlock implements Listener {
 
             @Override
             public void run() {
-                // TODO: refactor this runner
-                // TODO: animation and sound for writtenBrush
-                // TODO: particles when traced block is not written to brush (?)
+                // TODO: hide coordinates in brush lore if config option is set
                 // TODO: replace invisible glowing shulker with BlockDisplay
+                // TODO: prevent sus gravel and sand from break with fingerprint brush
 
                 if (isBrushInHand(player, true)) {
                     boolean isPlayerInProgress = plugin.activeBlockTraces.containsKey(playerId);
                     boolean isKeyPressed = plugin.playersHoldingRightClickTimestamp.get(playerId) != null && System.currentTimeMillis() - plugin.playersHoldingRightClickTimestamp.get(playerId) <= 200;
 
-                    if (!isPlayerInProgress || !isKeyPressed || !isBrushInHand(player)) {
+                    if (!isPlayerInProgress || !isKeyPressed || !isBrushInHand(player) || player.hasCooldown(player.getInventory().getItemInMainHand())) {
                         cleanup();
                         return;
                     }
 
+                    if (ticks % 10 == 0) {
+                        Location soundLocation = currentTarget.getLocation().add(0.5, 1, 0.5);
+                        Sound sound = Sound.ITEM_GLOW_INK_SAC_USE;
+                        soundLocation.getWorld().playSound(soundLocation, sound, 1.0f, 1.0f);
+                        player.swingMainHand();
+                    }
+
                     if (ticks >= maxTicks) {
-                        ItemStack brush = player.getInventory().getItemInMainHand();
-                        ItemMeta meta = brush.getItemMeta();
-                        if (meta != null) {
-                            long[] locArr = meta.getPersistentDataContainer().get(new NamespacedKey(plugin, "block_location"), PersistentDataType.LONG_ARRAY);
-                            if (locArr != null) {
-                                Location loc = new Location(currentTarget.getWorld(), locArr[0], locArr[1], locArr[2]);
+                        verifyFingerprint(player.getInventory().getItemInMainHand(), currentTarget);
 
-                                if (loc.equals(currentTarget.getLocation())) {
-                                    player.sendMessage("§a§l[TraceBrush] §r§aYou have successfully traced the block!");
-                                    TraceBrushUtils.setBlockGlowing(currentTarget.getWorld(), currentTarget.getLocation(), GLOWING_EFFECT_IN_SECONDS);
-                                }
-
-                            }
-                        }
-
-                        player.setCooldown(TraceBrushItem.getBlankBrushItem().getType(), 20 * 5);
+                        setBrushCooldown(player);
                         cleanup();
                     }
                 } else {
                     Block targetBlockExact = player.getTargetBlockExact(MAX_TARGET_DISTANCE);
 
-                    if (targetBlockExact == null) {
+                    if (targetBlockExact == null || !player.isHandRaised()) {
                         cleanup();
                         return;
                     }
@@ -107,31 +102,9 @@ public class UseTraceBrushOnBlock implements Listener {
                     }
 
                     if (ticks >= maxTicks) {
-                        List<String[]> lookup = coreProtectAPI.blockLookup(currentTarget, 0);
+                        collectFingerprint(player, currentTarget);
 
-                        if (!lookup.isEmpty()) {
-                            String placedBy = null;
-                            for (String[] row : lookup) {
-                                CoreProtectAPI.ParseResult result = coreProtectAPI.parseResult(row);
-
-                                if (result.getActionId() == CoreProtectInteractionType.PLACEMENT.ordinal()) {
-                                    placedBy = result.getPlayer();
-                                    break;
-                                }
-                            }
-
-                            if (placedBy == null) {
-                                TraceBrushItem.writeFingerprintToBrush(player, null, null);
-                                return;
-                            }
-
-                            player.sendMessage("§a§l[TraceBrush] §r§aYou have write a block");
-                            TraceBrushItem.writeFingerprintToBrush(player, Bukkit.getOfflinePlayer(placedBy).getUniqueId(), currentTarget);
-                        } else {
-                            TraceBrushItem.writeFingerprintToBrush(player, null, null);
-                        }
-
-                        player.setCooldown(TraceBrushItem.getBlankBrushItem().getType(), 20 * 5);
+                        setBrushCooldown(player);
                         cleanup();
                     }
                 }
@@ -145,5 +118,51 @@ public class UseTraceBrushOnBlock implements Listener {
                 cancel();
             }
         }.runTaskTimer(plugin, 0, 1);
+    }
+
+    private void collectFingerprint(Player player, Block targetBlock) {
+        List<String[]> lookup = coreProtectAPI.blockLookup(targetBlock, 0);
+
+        if (!lookup.isEmpty()) {
+            String placedBy = null;
+            for (String[] row : lookup) {
+                CoreProtectAPI.ParseResult result = coreProtectAPI.parseResult(row);
+
+                if (result.getActionId() == CoreProtectInteractionType.PLACEMENT.ordinal()) {
+                    placedBy = result.getPlayer();
+                    break;
+                }
+            }
+
+            if (placedBy == null) {
+                TraceBrushItem.writeFingerprintToBrush(player, null, null);
+                return;
+            }
+
+            TraceBrushItem.writeFingerprintToBrush(player, Bukkit.getOfflinePlayer(placedBy).getUniqueId(), targetBlock);
+        } else {
+            TraceBrushItem.writeFingerprintToBrush(player, null, null);
+        }
+    }
+
+    private void verifyFingerprint(ItemStack brush, Block targetBlock) {
+        ItemMeta meta = brush.getItemMeta();
+        if (meta != null) {
+            long[] locArr = meta.getPersistentDataContainer().get(new NamespacedKey(plugin, "block_location"), PersistentDataType.LONG_ARRAY);
+            if (locArr != null) {
+                Location loc = new Location(targetBlock.getWorld(), locArr[0], locArr[1], locArr[2]);
+
+                if (loc.equals(targetBlock.getLocation())) {
+                    TraceBrushUtils.setBlockGlowing(targetBlock.getWorld(), targetBlock.getLocation(), GLOWING_EFFECT_IN_SECONDS);
+                } else {
+                    // TODO: particles when traced block is not written to brush
+                }
+            }
+        }
+    }
+
+    private void setBrushCooldown(Player player) {
+        player.setCooldown(TraceBrushItem.getBlankBrushItem().getType(), secondsToTicks(BRUSH_COOLDOWN_IN_SECONDS));
+        player.setCooldown(TraceBrushItem.getWrittenBrushItem().getType(), secondsToTicks(BRUSH_COOLDOWN_IN_SECONDS));
     }
 }
