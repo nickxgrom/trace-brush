@@ -108,7 +108,6 @@ public class UseTraceBrushOnBlock implements Listener {
                         cleanup();
                     }
                 }
-
                 ticks++;
             }
 
@@ -153,7 +152,7 @@ public class UseTraceBrushOnBlock implements Listener {
                 Location loc = new Location(targetBlock.getWorld(), locArr[0], locArr[1], locArr[2]);
 
                 if (loc.equals(targetBlock.getLocation())) {
-                    TraceBrushUtils.setBlockGlowing(targetBlock.getWorld(), targetBlock.getLocation(), GLOWING_EFFECT_IN_SECONDS);
+                    TraceBrushUtils.setBlockGlowing(targetBlock, GLOWING_EFFECT_IN_SECONDS);
                 } else {
                     // TODO: particles when traced block is not written to brush
                 }
