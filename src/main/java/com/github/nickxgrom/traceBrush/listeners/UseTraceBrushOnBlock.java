@@ -63,7 +63,6 @@ public class UseTraceBrushOnBlock implements Listener {
             @Override
             public void run() {
                 // TODO: hide coordinates in brush lore if config option is set
-                // TODO: replace invisible glowing shulker with BlockDisplay
                 // TODO: prevent sus gravel and sand from break with fingerprint brush
 
                 if (isBrushInHand(player, true)) {

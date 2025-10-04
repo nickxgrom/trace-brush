@@ -1,3 +1,4 @@
+disableCoordinatesInBrushLore: true
 brushCooldownInSeconds: 5
 maxTargetDistanceForBlock: 5
 maxTargetDistanceForTarget: 3

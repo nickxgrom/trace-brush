@@ -17,6 +17,7 @@ import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -25,6 +26,7 @@ import static com.github.nickxgrom.traceBrush.utils.TraceBrushUtils.isBrushInHan
 
 public class TraceBrushItem extends ItemStack {
     private static final TraceBrush plugin = JavaPlugin.getPlugin(TraceBrush.class);
+    private static final Boolean DISABLE_COORDINATES_IN_BRUSH_LORE = plugin.getConfig().getBoolean("disableCoordinatesInBrushLore", false);
     private static final NamespacedKey key = new NamespacedKey(plugin, "traceBrush");
 
     private static final ItemStack blankBrushItem = ItemStack.of(Material.BRUSH);
@@ -111,15 +113,30 @@ public class TraceBrushItem extends ItemStack {
             );
             meta.getPersistentDataContainer().set(new NamespacedKey(plugin, "block_material"), PersistentDataType.STRING, block.getType().data.getCanonicalName());
 //            TODO: add setting to display material as png with resource pack
-            meta.lore(List.of(
-                    Component.text("Material: ")
-                            .append(Component.translatable(Objects.requireNonNull(block.getType().getBlockTranslationKey())))
-                            .color(NamedTextColor.WHITE)
-                            .decoration(TextDecoration.ITALIC, false),
-//                    TODO: configure visibility of location, add particles to know which block was brushed
-                    Component.text(String.format("%d %d %d", block.getLocation().getBlockX(), block.getLocation().getBlockY(), block.getLocation().getBlockZ())).color(NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false)
-            ));
+            List<Component> lore = meta.lore();
+            if (lore == null) {
+                lore = new ArrayList<>();
+            }
 
+            lore.add(Component.text("Material: ")
+                    .append(Component.translatable(Objects.requireNonNull(block.getType().getBlockTranslationKey())))
+                    .color(NamedTextColor.WHITE)
+                    .decoration(TextDecoration.ITALIC, false)
+            );
+
+            if (!DISABLE_COORDINATES_IN_BRUSH_LORE) {
+                lore.add(
+                        Component.text(
+                                String.format(
+                                        "%d %d %d",
+                                        block.getLocation().getBlockX(),
+                                        block.getLocation().getBlockY(),
+                                        block.getLocation().getBlockZ())
+                        ).color(NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false)
+                );
+            }
+
+            meta.lore(lore);
             ItemStack writtenTraceBrush = new ItemStack(TraceBrushItem.getWrittenBrushItem().getType());
             meta.setItemModel(Material.BRUSH.getKey());
             writtenTraceBrush.setItemMeta(meta);
