@@ -4,19 +4,20 @@ import com.github.nickxgrom.traceBrush.listeners.OnFingerprintBrushCraft;
 import com.github.nickxgrom.traceBrush.listeners.UseTraceBrushOnBlock;
 import com.github.nickxgrom.traceBrush.listeners.UseTraceBrushOnPlayer;
 import com.github.nickxgrom.traceBrush.models.TraceBrushItem;
-import net.kyori.adventure.text.format.NamedTextColor;
+import com.github.nickxgrom.traceBrush.utils.TraceBrushUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scoreboard.Scoreboard;
-import org.bukkit.scoreboard.Team;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 public final class TraceBrush extends JavaPlugin implements Listener {
+    public final String targetTeamName = "traceBrush_team";
+    public final String evidenceTeamName = "traceBrush_evidenceTeam";
     public Map<UUID, UUID> activePlayerTraces = new HashMap<>();
     public Map<UUID, Location> activeBlockTraces = new HashMap<>();
     public Map<UUID, Long> playersHoldingRightClickTimestamp = new HashMap<>();
@@ -29,18 +30,14 @@ public final class TraceBrush extends JavaPlugin implements Listener {
         Bukkit.getPluginManager().registerEvents(new OnFingerprintBrushCraft(), this);
         TraceBrushItem.RegisterBrushItem(getConfig().getStringList("traceBrushRecipe"));
 
-        Scoreboard mainScoreboard = this.getServer().getScoreboardManager().getMainScoreboard();
-        Team traceBrushTeam = mainScoreboard.getTeam("traceBrush_team");
-        if (traceBrushTeam == null) {
-            traceBrushTeam = mainScoreboard.registerNewTeam("traceBrush_team");
-        }
-        NamedTextColor teamColor = NamedTextColor.NAMES.value(getConfig().getString("glowingEffectColor", "white").toLowerCase());
-        traceBrushTeam.color(teamColor);
+        TraceBrushUtils.registerTeam(targetTeamName, getConfig().getString("playerGlowingEffectColor", "white"));
+        TraceBrushUtils.registerTeam(evidenceTeamName, getConfig().getString("evidenceGlowingEffectColor", "white"));
     }
 
     @Override
     public void onDisable() {
-        // Plugin shutdown logic
+        Objects.requireNonNull(this.getServer().getScoreboardManager().getMainScoreboard().getTeam(targetTeamName)).unregister();
+        Objects.requireNonNull(this.getServer().getScoreboardManager().getMainScoreboard().getTeam(evidenceTeamName)).unregister();
     }
 
 }
