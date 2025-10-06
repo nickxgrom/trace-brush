@@ -62,9 +62,6 @@ public class UseTraceBrushOnBlock implements Listener {
 
             @Override
             public void run() {
-                // TODO: hide coordinates in brush lore if config option is set
-                // TODO: prevent sus gravel and sand from break with fingerprint brush
-
                 if (isBrushInHand(player, true)) {
                     boolean isPlayerInProgress = plugin.activeBlockTraces.containsKey(playerId);
                     boolean isKeyPressed = plugin.playersHoldingRightClickTimestamp.get(playerId) != null && System.currentTimeMillis() - plugin.playersHoldingRightClickTimestamp.get(playerId) <= 200;

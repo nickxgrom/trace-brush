@@ -1,6 +1,7 @@
 package com.github.nickxgrom.traceBrush;
 
 import com.github.nickxgrom.traceBrush.listeners.OnFingerprintBrushCraft;
+import com.github.nickxgrom.traceBrush.listeners.OnSuspiciousBlockBrush;
 import com.github.nickxgrom.traceBrush.listeners.UseTraceBrushOnBlock;
 import com.github.nickxgrom.traceBrush.listeners.UseTraceBrushOnPlayer;
 import com.github.nickxgrom.traceBrush.models.TraceBrushItem;
@@ -28,6 +29,7 @@ public final class TraceBrush extends JavaPlugin implements Listener {
         Bukkit.getPluginManager().registerEvents(new UseTraceBrushOnPlayer(), this);
         Bukkit.getPluginManager().registerEvents(new UseTraceBrushOnBlock(), this);
         Bukkit.getPluginManager().registerEvents(new OnFingerprintBrushCraft(), this);
+        Bukkit.getPluginManager().registerEvents(new OnSuspiciousBlockBrush(), this);
         TraceBrushItem.RegisterBrushItem(getConfig().getStringList("traceBrushRecipe"));
 
         TraceBrushUtils.registerTeam(targetTeamName, getConfig().getString("playerGlowingEffectColor", "white"));
