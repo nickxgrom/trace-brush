@@ -11,6 +11,10 @@ import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
+import org.bukkit.block.data.Bisected;
+import org.bukkit.block.data.BlockData;
+import org.bukkit.block.data.type.Bed;
+import org.bukkit.block.data.type.Chest;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -116,6 +120,12 @@ public class UseTraceBrushOnBlock implements Listener {
     }
 
     private void collectFingerprint(Player player, Block targetBlock) {
+        if (targetBlock.getBlockData() instanceof Bed bed) {
+            if (bed.getPart() == Bed.Part.HEAD) {
+                targetBlock = targetBlock.getRelative(bed.getFacing().getOppositeFace());
+            }
+        }
+
         List<String[]> lookup = coreProtectAPI.blockLookup(targetBlock, 0);
 
         if (!lookup.isEmpty()) {
@@ -146,6 +156,23 @@ public class UseTraceBrushOnBlock implements Listener {
             long[] locArr = meta.getPersistentDataContainer().get(new NamespacedKey(plugin, "block_location"), PersistentDataType.LONG_ARRAY);
             if (locArr != null) {
                 Location loc = new Location(targetBlock.getWorld(), locArr[0], locArr[1], locArr[2]);
+
+                Block secondBlock = null;
+                BlockData data = targetBlock.getBlockData();
+                if (data instanceof Bisected bisected) {
+                    System.out.println("bisected");
+                }
+                if (data instanceof Bed bed) {
+                    System.out.println("bed");
+                    if (bed.getPart() == Bed.Part.HEAD) {
+                        targetBlock = targetBlock.getRelative(bed.getFacing().getOppositeFace());
+                        System.out.println("facing 1: " + bed.getFacing());
+                    }
+                }
+                if (data instanceof Chest chest) {
+                    System.out.println("chest");
+                }
+
 
                 if (loc.equals(targetBlock.getLocation())) {
                     TraceBrushUtils.setBlockGlowing(targetBlock, GLOWING_EFFECT_IN_SECONDS);
