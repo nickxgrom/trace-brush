@@ -156,20 +156,22 @@ public class UseTraceBrushOnBlock implements Listener {
             long[] locArr = meta.getPersistentDataContainer().get(new NamespacedKey(plugin, "block_location"), PersistentDataType.LONG_ARRAY);
             if (locArr != null) {
                 Location loc = new Location(targetBlock.getWorld(), locArr[0], locArr[1], locArr[2]);
-
-                Block secondBlock = null;
                 BlockData data = targetBlock.getBlockData();
-                if (data instanceof Bisected bisected) {
-                    System.out.println("bisected");
-                }
+
                 if (data instanceof Bed bed) {
-                    System.out.println("bed");
                     if (bed.getPart() == Bed.Part.HEAD) {
                         targetBlock = targetBlock.getRelative(bed.getFacing().getOppositeFace());
-                        System.out.println("facing 1: " + bed.getFacing());
                     }
                 }
+
+                Block secondBlock = null;
+                if (data instanceof Bisected bisected) {
+//                   TODO: check doors, double plants
+
+                    System.out.println("bisected");
+                }
                 if (data instanceof Chest chest) {
+//                    TODO: check chests, double chests, ender chests
                     System.out.println("chest");
                 }
 
