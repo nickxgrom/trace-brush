@@ -11,10 +11,12 @@ import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.Bisected;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.type.Bed;
 import org.bukkit.block.data.type.Chest;
+import org.bukkit.block.data.type.Door;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -126,6 +128,12 @@ public class UseTraceBrushOnBlock implements Listener {
             }
         }
 
+        if (targetBlock.getBlockData() instanceof Door door) {
+            if (door.getHalf() == Bisected.Half.TOP) {
+                targetBlock = targetBlock.getRelative(BlockFace.DOWN);
+            }
+        }
+
         List<String[]> lookup = coreProtectAPI.blockLookup(targetBlock, 0);
 
         if (!lookup.isEmpty()) {
@@ -151,6 +159,8 @@ public class UseTraceBrushOnBlock implements Listener {
     }
 
     private void verifyFingerprint(ItemStack brush, Block targetBlock) {
+//        TODO: non-mvp: remove glowing if player interact with door, trapdoor or anything that can change persistent block state
+//        TODO: non-mvp: slabs are tricky, need to check (or maybe not) block data for top/bottom/ double
         ItemMeta meta = brush.getItemMeta();
         if (meta != null) {
             long[] locArr = meta.getPersistentDataContainer().get(new NamespacedKey(plugin, "block_location"), PersistentDataType.LONG_ARRAY);
@@ -166,18 +176,27 @@ public class UseTraceBrushOnBlock implements Listener {
 
                 Block secondBlock = null;
                 if (data instanceof Bisected bisected) {
-//                   TODO: check doors, double plants
-
-                    System.out.println("bisected");
+//                  WARNING: can't take fingerprint from top part of double plant, may be fixed when add consumable component with brush animation and remove brush as base of item
+                    if (bisected.getHalf() == Bisected.Half.TOP) {
+                        secondBlock = targetBlock;
+                        targetBlock = targetBlock.getRelative(BlockFace.DOWN);
+                    } else {
+                        secondBlock = targetBlock.getRelative(BlockFace.UP);
+                    }
                 }
                 if (data instanceof Chest chest) {
 //                    TODO: check chests, double chests, ender chests
+//                    TODO: double chests: who first placed chest is owner of both, if first is naturally generated then second is owner of both
                     System.out.println("chest");
                 }
 
 
                 if (loc.equals(targetBlock.getLocation())) {
                     TraceBrushUtils.setBlockGlowing(targetBlock, GLOWING_EFFECT_IN_SECONDS);
+
+                    if (secondBlock != null) {
+                        TraceBrushUtils.setBlockGlowing(secondBlock, GLOWING_EFFECT_IN_SECONDS);
+                    }
                 } else {
                     // TODO: particles when traced block is not written to brush
                 }
