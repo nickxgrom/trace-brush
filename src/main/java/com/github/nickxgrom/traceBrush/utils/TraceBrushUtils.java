@@ -8,8 +8,10 @@ import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.type.Bed;
+import org.bukkit.block.data.type.Chest;
 import org.bukkit.entity.BlockDisplay;
 import org.bukkit.entity.Display;
 import org.bukkit.entity.Player;
@@ -137,6 +139,57 @@ public class TraceBrushUtils {
                     yaw = 90f;
                     translation.add(1, 0, 1);
                     break;
+            }
+        }
+
+        /* initial problem was with second block: when I glowed it up, the blockDisplay doesn't connect each other and setting chestType to LEFT or RIGHT done nothing
+        * it's really messy, and I don't know it's my leak of knowledge or minecraft/bukkit/paper built like that.
+        * fundamental: we're always stretch a chest by x coordinate besides its match z coordinate line.
+        * and it's some hell in switch code and debugging all this staff.
+        * if you have some ideas to solve this problem: welcome to issue or create a merge request */
+        if (data instanceof Chest chest) {
+            if (chest.getType() != Chest.Type.SINGLE) {
+                BlockFace facing = chest.getFacing();
+                Chest.Type chestType = chest.getType();
+
+                newScale.x = vectorValue * 2;
+                if (chestType == Chest.Type.LEFT) {
+                    switch (facing) {
+                        case NORTH:
+                            translation.x = shift + 2;
+                            translation.z = shift + 1;
+                            yaw = 180f;
+                            break;
+                        case SOUTH:
+                            translation.x = shift - 1;
+                            break;
+                        case WEST:
+                            translation.x = shift + 1;
+                            translation.z = shift - 1;
+                            yaw = -90f;
+                            break;
+                        case EAST:
+                            translation.z = shift + 2;
+                            yaw = 90f;
+                            break;
+                    }
+                } else if (chestType == Chest.Type.RIGHT) {
+                    switch (facing) {
+                        case NORTH:
+                            translation.x = shift + 1;
+                            translation.z = shift + 1;
+                            yaw = 180f;
+                            break;
+                        case WEST:
+                            yaw = -90f;
+                            translation.x = shift + 1;
+                            break;
+                        case EAST:
+                            translation.z = shift + 1;
+                            yaw = 90f;
+                            break;
+                    }
+                }
             }
         }
 

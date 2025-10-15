@@ -15,7 +15,6 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.Bisected;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.type.Bed;
-import org.bukkit.block.data.type.Chest;
 import org.bukkit.block.data.type.Door;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -184,12 +183,6 @@ public class UseTraceBrushOnBlock implements Listener {
                         secondBlock = targetBlock.getRelative(BlockFace.UP);
                     }
                 }
-                if (data instanceof Chest chest) {
-//                    TODO: check chests, double chests, ender chests
-//                    TODO: double chests: who first placed chest is owner of both, if first is naturally generated then second is owner of both
-                    System.out.println("chest");
-                }
-
 
                 if (loc.equals(targetBlock.getLocation())) {
                     TraceBrushUtils.setBlockGlowing(targetBlock, GLOWING_EFFECT_IN_SECONDS);
