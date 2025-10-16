@@ -38,6 +38,12 @@ public final class TraceBrush extends JavaPlugin implements Listener {
 
     @Override
     public void onDisable() {
+//        TODO: kill all BlockDisplay entities
+//        for (World world : Bukkit.getWorlds()) {
+//            for (Entity entity : world.getEntitiesByClass(BlockDisplay.class)) {
+//                entity.remove();
+//            }
+//        }
         Objects.requireNonNull(this.getServer().getScoreboardManager().getMainScoreboard().getTeam(targetTeamName)).unregister();
         Objects.requireNonNull(this.getServer().getScoreboardManager().getMainScoreboard().getTeam(evidenceTeamName)).unregister();
     }

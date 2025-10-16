@@ -8,6 +8,8 @@ import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
+import org.bukkit.block.data.BlockData;
+import org.bukkit.block.data.type.Bed;
 import org.bukkit.entity.BlockDisplay;
 import org.bukkit.entity.Display;
 import org.bukkit.entity.Player;
@@ -99,11 +101,13 @@ public class TraceBrushUtils {
 
     public static void setBlockGlowing(Block block, int durationInSeconds) {
         BlockDisplay display = block.getWorld().spawn(block.getLocation(), BlockDisplay.class);
-        display.setBlock(block.getType().createBlockData());
+        BlockData data = block.getBlockData();
+
         display.setGlowing(true);
         display.setInvisible(true);
         display.setInvulnerable(true);
         display.setNoPhysics(true);
+
         if (EVIDENCE_GLOWING_COLOR != null) {
             display.setGlowColorOverride(getColor(EVIDENCE_GLOWING_COLOR));
         }
@@ -116,15 +120,34 @@ public class TraceBrushUtils {
         float shift = -(scaleDelta / 2);
         Vector3f translation = new Vector3f(shift, shift, shift);
 
+        float yaw = 0f;
+        if (data instanceof Bed bed) {
+            switch (bed.getFacing()) {
+                case NORTH:
+                    yaw = 180f;
+                    translation.add(1, 0, 0);
+                    break;
+                case SOUTH:
+                    translation.add(0, 0, 1);
+                    break;
+                case WEST:
+                    yaw = -90f;
+                    break;
+                case EAST:
+                    yaw = 90f;
+                    translation.add(1, 0, 1);
+                    break;
+            }
+        }
 
         display.setTransformation(new Transformation(
                 translation,
-                new Quaternionf(),
+                new Quaternionf().rotationY((float) Math.toRadians(yaw)),
                 newScale,
                 new Quaternionf()
         ));
-//        TODO: problem with doors
-        display.setBlock(block.getBlockData());
+
+        display.setBlock(data);
         display.setBrightness(new Display.Brightness(15, 15));
 
 //        might be laggy, check

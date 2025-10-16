@@ -113,10 +113,7 @@ public class TraceBrushItem extends ItemStack {
             );
             meta.getPersistentDataContainer().set(new NamespacedKey(plugin, "block_material"), PersistentDataType.STRING, block.getType().data.getCanonicalName());
 //            TODO: add setting to display material as png with resource pack
-            List<Component> lore = meta.lore();
-            if (lore == null) {
-                lore = new ArrayList<>();
-            }
+            List<Component> lore = new ArrayList<>();
 
             lore.add(Component.text("Material: ")
                     .append(Component.translatable(Objects.requireNonNull(block.getType().getBlockTranslationKey())))
