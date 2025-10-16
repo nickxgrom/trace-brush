@@ -8,8 +8,16 @@ import com.github.nickxgrom.traceBrush.models.TraceBrushItem;
 import com.github.nickxgrom.traceBrush.utils.TraceBrushUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.NamespacedKey;
+import org.bukkit.World;
+import org.bukkit.entity.BlockDisplay;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Shulker;
 import org.bukkit.event.Listener;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scoreboard.Scoreboard;
+import org.bukkit.scoreboard.Team;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -38,12 +46,26 @@ public final class TraceBrush extends JavaPlugin implements Listener {
 
     @Override
     public void onDisable() {
-//        TODO: kill all BlockDisplay entities
-//        for (World world : Bukkit.getWorlds()) {
-//            for (Entity entity : world.getEntitiesByClass(BlockDisplay.class)) {
-//                entity.remove();
-//            }
-//        }
+        for (World world : Bukkit.getWorlds()) {
+            for (Entity entity : world.getEntitiesByClass(BlockDisplay.class)) {
+                if (Boolean.TRUE.equals(entity.getPersistentDataContainer().get(new NamespacedKey(this, "is_evidence_display"), PersistentDataType.BOOLEAN))) {
+                    entity.remove();
+                }
+            }
+
+            Scoreboard main = this.getServer().getScoreboardManager().getMainScoreboard();
+            Team evidenceTeam = main.getTeam(evidenceTeamName);
+            if (evidenceTeam != null) {
+                for (String entry : evidenceTeam.getEntries()) {
+                    UUID uuid = UUID.fromString(entry);
+                    Entity entity = Bukkit.getEntity(uuid);
+                    if (entity instanceof Shulker shulker) {
+                        shulker.remove();
+                    }
+                }
+            }
+        }
+
         Objects.requireNonNull(this.getServer().getScoreboardManager().getMainScoreboard().getTeam(targetTeamName)).unregister();
         Objects.requireNonNull(this.getServer().getScoreboardManager().getMainScoreboard().getTeam(evidenceTeamName)).unregister();
     }

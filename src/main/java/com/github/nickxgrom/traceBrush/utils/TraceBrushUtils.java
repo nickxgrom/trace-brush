@@ -13,6 +13,7 @@ import org.bukkit.block.data.type.Bed;
 import org.bukkit.entity.BlockDisplay;
 import org.bukkit.entity.Display;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Shulker;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
@@ -24,6 +25,8 @@ import org.bukkit.util.Transformation;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
+
+import java.util.Arrays;
 
 public class TraceBrushUtils {
     private static final TraceBrush plugin = JavaPlugin.getPlugin(TraceBrush.class);
@@ -99,14 +102,38 @@ public class TraceBrushUtils {
         }, TraceBrushUtils.secondsToTicks(durationInSeconds));
     }
 
+    //    TODO: rework chests after https://bugs.mojang.com/browse/MC/issues/MC-259954
     public static void setBlockGlowing(Block block, int durationInSeconds) {
+        BlockData data = block.getBlockData();
+
+        String materialName = data.getMaterial().toString().toLowerCase();
+//        TODO: non-mvp for single chest and ender chest do the rotation
+        boolean isTrickyBlock =
+                materialName.endsWith("sign")
+                        || materialName.endsWith("banner")
+                        || Arrays.asList(
+                        getNormalizedMaterialName(Material.CHEST),
+                        getNormalizedMaterialName(Material.ENDER_CHEST),
+                        getNormalizedMaterialName(Material.TRAPPED_CHEST)
+                ).contains(materialName);
+
+
+        if (isTrickyBlock) {
+            setGlowingByShulker(block, durationInSeconds);
+        } else {
+            setGlowingByBlockDisplay(block, durationInSeconds);
+        }
+    }
+
+    private static void setGlowingByBlockDisplay(Block block, int durationInSeconds) {
         BlockDisplay display = block.getWorld().spawn(block.getLocation(), BlockDisplay.class);
         BlockData data = block.getBlockData();
 
         display.setGlowing(true);
-        display.setInvisible(true);
         display.setInvulnerable(true);
         display.setNoPhysics(true);
+        display.setBrightness(new Display.Brightness(15, 15));
+        display.getPersistentDataContainer().set(new NamespacedKey(plugin, "is_evidence_display"), PersistentDataType.BOOLEAN, true);
 
         if (EVIDENCE_GLOWING_COLOR != null) {
             display.setGlowColorOverride(getColor(EVIDENCE_GLOWING_COLOR));
@@ -148,17 +175,50 @@ public class TraceBrushUtils {
         ));
 
         display.setBlock(data);
-        display.setBrightness(new Display.Brightness(15, 15));
 
-//        might be laggy, check
+        setRunnable(display, secondsToTicks(durationInSeconds), block);
+    }
+
+    private static void setGlowingByShulker(Block block, int durationInSeconds) {
+        Shulker shulker = block.getWorld().spawn(block.getLocation(), Shulker.class);
+        shulker.setInvisible(true);
+        shulker.setInvulnerable(true);
+        shulker.setSilent(true);
+        shulker.setAI(false);
+        shulker.setGlowing(true);
+
+        Scoreboard scoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
+        Team team = scoreboard.getTeam("traceBrush_evidenceTeam");
+        if (team != null) {
+            team.addEntity(shulker);
+        }
+
+        setRunnable(shulker, secondsToTicks(durationInSeconds), block);
+    }
+
+    private static void setRunnable(Display display, int maxTicks, Block block) {
         new BukkitRunnable() {
-            final int maxTicks = secondsToTicks(durationInSeconds);
             int ticks = 0;
 
             @Override
             public void run() {
                 if (ticks >= maxTicks || block.getWorld().getBlockAt(block.getLocation()).getType() == Material.AIR) {
                     display.remove();
+                }
+
+                ticks++;
+            }
+        }.runTaskTimer(plugin, 0, 1);
+    }
+
+    private static void setRunnable(Shulker shulker, int maxTicks, Block block) {
+        new BukkitRunnable() {
+            int ticks = 0;
+
+            @Override
+            public void run() {
+                if (ticks >= maxTicks || block.getWorld().getBlockAt(block.getLocation()).getType() == Material.AIR) {
+                    shulker.remove();
                 }
 
                 ticks++;
@@ -174,5 +234,9 @@ public class TraceBrushUtils {
         }
         NamedTextColor teamColor = NamedTextColor.NAMES.value(color.toLowerCase());
         traceBrushTeam.color(teamColor);
+    }
+
+    private static String getNormalizedMaterialName(Material material) {
+        return material.toString().toLowerCase();
     }
 }
