@@ -10,6 +10,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Sound;
+import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.Bisected;
@@ -191,7 +192,15 @@ public class UseTraceBrushOnBlock implements Listener {
                         TraceBrushUtils.setBlockGlowing(secondBlock, GLOWING_EFFECT_IN_SECONDS);
                     }
                 } else {
-                    // TODO: particles when traced block is not written to brush
+                   targetBlock.getWorld().spawnParticle(
+                           Particle.CRIT,
+                           targetBlock.getLocation().add(0.5, 0.5, 0.5),
+                           20,
+                           0.7,
+                           0.7,
+                           0.7,
+                           0.1
+                   );
                 }
             }
         }
